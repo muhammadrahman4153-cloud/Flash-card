@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlashFun — Belajar Lebih Seru</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div id="app">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <a class="nav-brand" href="#" onclick="navigate('dashboard')">
+        <span class="logo-icon">⚡</span><span class="logo-text">FlashFun</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <button class="btn-icon" onclick="toggleDark()" id="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span>⚡</span> FlashFun</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">🏠 Dashboard</a>
+      <a class="nav-item" data-page="decks" onclick="navigate('decks')">📚 Deck Saya</a>
+      <a class="nav-item" data-page="study" onclick="navigate('study')">🎓 Belajar</a>
+      <a class="nav-item" data-page="quiz" onclick="navigate('quiz')">🧠 Quiz</a>
+      <a class="nav-item" data-page="stats" onclick="navigate('stats')">📊 Statistik</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <section id="page-dashboard" class="page">
+      <div class="page-header">
+        <div><h1 class="page-title">Halo, Pelajar! 👋</h1><p class="page-sub">Siap belajar hari ini?</p></div>
+        <button class="btn-primary" onclick="openDeckModal()">+ Deck Baru</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card" style="--ac:#6c63ff"><div class="stat-icon">📚</div><div><span class="stat-val" id="stat-decks">0</span><span class="stat-label">Total Deck</span></div></div>
+        <div class="stat-card" style="--ac:#ff6584"><div class="stat-icon">🃏</div><div><span class="stat-val" id="stat-cards">0</span><span class="stat-label">Total Kartu</span></div></div>
+        <div class="stat-card" style="--ac:#43d9a2"><div class="stat-icon">🏆</div><div><span class="stat-val" id="stat-best">-</span><span class="stat-label">Best Score</span></div></div>
+        <div class="stat-card" style="--ac:#ffa94d"><div class="stat-icon">⭐</div><div><span class="stat-val" id="stat-avg">-</span><span class="stat-label">Rata-rata</span></div></div>
+      </div>
+      <div class="section-header"><h2>Deck Terbaru</h2><a href="#" onclick="navigate('decks')" class="see-all">Lihat semua →</a></div>
+      <div class="deck-grid" id="dash-decks"></div>
+      <div class="section-header"><h2>Aktivitas Terbaru</h2></div>
+      <div class="activity-list" id="dash-activity">
+        <div class="empty-state"><div class="empty-icon">📭</div><p>Belum ada aktivitas. Mulai belajar!</p></div>
+      </div>
+    </section>
+
+    <!-- ══ DECKS ══ -->
+    <section id="page-decks" class="page hidden">
+      <div class="page-header">
+        <div><h1 class="page-title">📚 Deck Saya</h1><p class="page-sub">Kelola flashcard kamu</p></div>
+        <button class="btn-primary" onclick="openDeckModal()">+ Deck Baru</button>
+      </div>
+      <div class="deck-controls">
+        <div class="search-box"><span>🔍</span><input type="text" id="deck-search" placeholder="Cari deck…" oninput="filterDecks()" /></div>
+        <div class="filter-chips">
+          <button class="chip active" data-cat="all" onclick="selectCat(this,'all')">Semua</button>
+          <button class="chip" data-cat="Matematika" onclick="selectCat(this,'Matematika')">Matematika</button>
+          <button class="chip" data-cat="Bahasa" onclick="selectCat(this,'Bahasa')">Bahasa</button>
+          <button class="chip" data-cat="Pemrograman" onclick="selectCat(this,'Pemrograman')">Pemrograman</button>
+          <button class="chip" data-cat="Sains" onclick="selectCat(this,'Sains')">Sains</button>
+          <button class="chip" data-cat="Lainnya" onclick="selectCat(this,'Lainnya')">Lainnya</button>
+        </div>
+        <label class="fav-toggle"><input type="checkbox" id="fav-filter" onchange="filterDecks()" /> ⭐ Favorit</label>
+      </div>
+      <div class="deck-grid" id="decks-grid"></div>
+      <div class="empty-state hidden" id="decks-empty">
+        <div class="empty-icon">📂</div><h3>Belum ada deck</h3>
+        <p>Buat deck pertamamu!</p><button class="btn-primary" onclick="openDeckModal()">+ Buat Deck</button>
+      </div>
+    </section>
+
+    <!-- ══ DECK DETAIL ══ -->
+    <section id="page-deck-detail" class="page hidden">
+      <div class="page-header">
+        <button class="btn-back" onclick="navigate('decks')">← Kembali</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-secondary" onclick="openCardModal()">+ Kartu</button>
+          <button class="btn-primary" onclick="startStudy()">🎓 Belajar</button>
+          <button class="btn-accent" onclick="startQuizFromDeck()">🧠 Quiz</button>
+        </div>
+      </div>
+      <div class="deck-detail-header card" id="deck-detail-header"></div>
+      <div class="section-header"><h2>Kartu dalam Deck</h2><span id="card-count-label" class="badge">0 kartu</span></div>
+      <div class="cards-grid" id="cards-grid"></div>
+      <div class="empty-state hidden" id="cards-empty">
+        <div class="empty-icon">🃏</div><h3>Deck masih kosong</h3>
+        <button class="btn-primary" onclick="openCardModal()">+ Tambah Kartu</button>
+      </div>
+    </section>
+
+    <!-- ══ STUDY ══ -->
+    <section id="page-study" class="page hidden">
+      <div class="page-header">
+        <button class="btn-back" onclick="exitStudy()">← Keluar</button>
+        <h1 class="page-title" id="study-deck-name">Belajar</h1>
+      </div>
+      <div class="study-progress-wrap">
+        <div class="study-progress-bar"><div class="study-progress-fill" id="study-progress-fill"></div></div>
+        <span class="study-progress-text" id="study-progress-text">0 / 0</span>
+      </div>
+      <div class="study-arena">
+        <div class="flashcard-3d" onclick="flipCard()">
+          <div class="fc-inner" id="fc-inner">
+            <div class="fc-front"><span class="fc-hint">Klik untuk lihat jawaban</span><div class="fc-content" id="fc-front-content"></div></div>
+            <div class="fc-back"><span class="fc-hint">Jawaban</span><div class="fc-content" id="fc-back-content"></div></div>
+          </div>
+        </div>
+        <div class="study-controls" id="study-controls">
+          <button class="btn-wrong" onclick="markCard(false)">😕 Belum Paham</button>
+          <button class="btn-right" onclick="markCard(true)">✅ Sudah Paham</button>
+        </div>
+        <p class="study-hint">Klik kartu untuk membalik</p>
+      </div>
+      <div class="study-result hidden" id="study-result">
+        <div class="result-card card">
+          <div class="result-emoji" id="result-emoji">🎉</div>
+          <h2 id="result-title">Selesai!</h2><p id="result-desc"></p>
+          <div class="result-stats">
+            <div><span id="res-right">0</span><small>Paham</small></div>
+            <div><span id="res-wrong">0</span><small>Belum</small></div>
+          </div>
+          <div class="result-actions">
+            <button class="btn-secondary" onclick="restartStudy()">🔄 Ulangi</button>
+            <button class="btn-primary" onclick="exitStudy()">✅ Selesai</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ QUIZ ══ -->
+    <section id="page-quiz" class="page hidden">
+      <div id="quiz-setup">
+        <div class="page-header">
+          <button class="btn-back" onclick="navigate('decks')">← Kembali</button>
+          <h1 class="page-title">🧠 Mode Quiz</h1>
+        </div>
+        <div class="quiz-setup-card card">
+          <h2>Pilih Deck & Mode</h2>
+          <div class="form-group"><label>Pilih Deck</label><select id="quiz-deck-select" class="select-modern"></select></div>
+          <div class="form-group">
+            <label>Mode Quiz</label>
+            <div class="mode-grid">
+              <label class="mode-card"><input type="radio" name="quiz-mode" value="mc" checked />
+                <div class="mode-inner"><span>🔘</span><strong>Pilihan Ganda</strong><small>4 pilihan</small></div>
+              </label>
+              <label class="mode-card"><input type="radio" name="quiz-mode" value="type" />
+                <div class="mode-inner"><span>⌨️</span><strong>Ketik Jawaban</strong><small>Tulis sendiri</small></div>
+              </label>
+              <label class="mode-card"><input type="radio" name="quiz-mode" value="tf" />
+                <div class="mode-inner"><span>⚖️</span><strong>Benar/Salah</strong><small>True or False</small></div>
+              </label>
+            </div>
+          </div>
+          <button class="btn-primary full" onclick="startQuizSession()">Mulai Quiz 🚀</button>
+        </div>
+      </div>
+
+      <div id="quiz-session" class="hidden">
+        <div class="quiz-topbar">
+          <button class="btn-back-sm" onclick="exitQuiz()">✕</button>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span id="qz-mode-label" class="badge-mode">Pilihan Ganda</span>
+            <span id="qz-deck-name" style="font-size:.9rem;color:var(--text2)">Deck</span>
+          </div>
+          <div>Skor: <strong id="qz-score">0</strong></div>
+        </div>
+        <div class="quiz-progress-wrap">
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+          <span id="qz-progress-text">1/10</span>
+        </div>
+        <div class="timer-row">
+          <div class="timer-ring">
+            <svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" class="timer-bg"/><circle cx="30" cy="30" r="26" class="timer-arc" id="timer-arc"/></svg>
+            <span id="timer-val">30</span>
+          </div>
+        </div>
+        <div class="quiz-question-card card">
+          <p class="qz-counter" id="qz-counter">Soal 1 dari 10</p>
+          <h3 class="qz-question" id="qz-question">Pertanyaan</h3>
+        </div>
+        <div id="qz-mc" class="mc-grid"></div>
+        <div id="qz-type" class="qz-type-wrap hidden">
+          <input type="text" id="qz-type-input" class="qz-type-input" placeholder="Ketik jawaban kamu…" />
+          <button class="btn-primary" onclick="submitTypeAnswer()">Kirim</button>
+        </div>
+        <div id="qz-tf" class="qz-tf-wrap hidden">
+          <button class="btn-tf true" onclick="submitTF(true)">✅ Benar</button>
+          <button class="btn-tf false" onclick="submitTF(false)">❌ Salah</button>
+        </div>
+        <div class="feedback-overlay hidden" id="feedback-overlay"><span id="feedback-text">✅ Benar!</span></div>
+      </div>
+
+      <div id="quiz-result" class="hidden">
+        <div class="confetti-wrap" id="confetti-wrap"></div>
+        <div class="result-card card" style="max-width:500px;margin:0 auto">
+          <div class="result-emoji" id="qz-result-emoji">🎉</div>
+          <h2>Quiz Selesai!</h2>
+          <div class="result-score-big"><span id="qz-final-score">0</span><span class="score-denom" id="qz-denom">/10</span></div>
+          <p id="qz-result-msg"></p>
+          <div class="result-breakdown" id="result-breakdown"></div>
+          <div class="result-actions">
+            <button class="btn-secondary" onclick="retryQuiz()">🔄 Coba Lagi</button>
+            <button class="btn-primary" onclick="exitQuiz()">✅ Selesai</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ STATISTIK ══ -->
+    <section id="page-stats" class="page hidden">
+      <div class="page-header"><h1 class="page-title">📊 Statistik Belajar</h1></div>
+
+      <!-- Kartu ringkasan -->
+      <div class="stats-grid">
+        <div class="stat-card" style="--ac:#6c63ff"><div class="stat-icon">📚</div><div><span class="stat-val" id="st-decks">0</span><span class="stat-label">Deck</span></div></div>
+        <div class="stat-card" style="--ac:#ff6584"><div class="stat-icon">🃏</div><div><span class="stat-val" id="st-cards">0</span><span class="stat-label">Total Kartu</span></div></div>
+        <div class="stat-card" style="--ac:#43d9a2"><div class="stat-icon">🏆</div><div><span class="stat-val" id="st-best">-</span><span class="stat-label">Best Score</span></div></div>
+        <div class="stat-card" style="--ac:#ffa94d"><div class="stat-icon">📈</div><div><span class="stat-val" id="st-avg">-</span><span class="stat-label">Rata-rata Skor</span></div></div>
+        <div class="stat-card" style="--ac:#20c997"><div class="stat-icon">🎯</div><div><span class="stat-val" id="st-quizzes">0</span><span class="stat-label">Quiz Selesai</span></div></div>
+        <div class="stat-card" style="--ac:#74c0fc"><div class="stat-icon">⚡</div><div><span class="stat-val" id="st-studied">0</span><span class="stat-label">Kartu Dipelajari</span></div></div>
+      </div>
+
+      <!-- Penguasaan kartu -->
+      <div class="section-header"><h2>🎯 Penguasaan Kartu</h2></div>
+      <div id="mastery-panel" class="card mastery-panel"></div>
+
+      <!-- Grafik skor quiz -->
+      <div class="section-header"><h2>📈 Tren Skor Quiz</h2></div>
+      <div class="card chart-wrap">
+        <canvas id="score-chart"></canvas>
+        <div class="empty-state hidden" id="chart-empty"><div class="empty-icon">📉</div><p>Belum ada data quiz.</p></div>
+      </div>
+
+      <!-- Dua kolom: distribusi + kalender -->
+      <div class="stats-two-col">
+        <!-- Distribusi skor -->
+        <div>
+          <div class="section-header"><h2>🥧 Distribusi Skor</h2></div>
+          <div class="card chart-wrap" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px">
+            <canvas id="dist-chart"></canvas>
+            <div class="empty-state hidden" id="dist-empty"><div class="empty-icon">📊</div><p>Belum ada data.</p></div>
+            <div id="dist-legend" class="dist-legend"></div>
+          </div>
+        </div>
+        <!-- Kalender aktivitas -->
+        <div>
+          <div class="section-header"><h2>📅 Aktivitas 30 Hari</h2></div>
+          <div class="card chart-wrap">
+            <div id="activity-calendar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar penguasaan per deck -->
+      <div class="section-header"><h2>📊 Penguasaan per Deck</h2></div>
+      <div class="card chart-wrap">
+        <canvas id="mastery-chart"></canvas>
+        <div class="empty-state hidden" id="mastery-empty"><div class="empty-icon">📚</div><p>Belum ada deck dengan kartu.</p></div>
+      </div>
+
+      <!-- Tabel breakdown per deck -->
+      <div class="section-header"><h2>📋 Ringkasan per Deck</h2></div>
+      <div class="card" style="overflow-x:auto;padding:4px">
+        <div id="deck-breakdown"></div>
+      </div>
+
+      <!-- Riwayat quiz -->
+      <div class="section-header"><h2>🕑 Riwayat Quiz</h2></div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state"><div class="empty-icon">📋</div><p>Belum ada riwayat.</p></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FAB -->
+  <div class="fab-wrap">
+    <button class="fab-main" id="fab-main" onclick="toggleFab()">+</button>
+    <div class="fab-menu" id="fab-menu">
+      <button class="fab-item" onclick="closeFab();openDeckModal()" title="Deck Baru">📚</button>
+      <button class="fab-item" onclick="closeFab();navigate('study')" title="Belajar">🎓</button>
+      <button class="fab-item" onclick="closeFab();navigate('quiz')" title="Quiz">🧠</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DECK -->
+<div class="modal-overlay hidden" id="deck-modal">
+  <div class="modal-box card">
+    <div class="modal-header"><h3 id="deck-modal-title">Buat Deck Baru</h3><button class="modal-close" onclick="closeDeckModal()">✕</button></div>
+    <div class="form-group"><label>Nama Deck *</label><input type="text" id="deck-name-input" placeholder="contoh: Biologi Sel" maxlength="60" /></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="deck-desc-input" placeholder="Deskripsi singkat…" rows="2"></textarea></div>
+    <div class="form-group"><label>Kategori</label>
+      <select id="deck-cat-input" class="select-modern">
+        <option>Matematika</option><option>Bahasa</option><option>Pemrograman</option><option>Sains</option><option>Lainnya</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Warna</label>
+      <div class="color-picker">
+        <button class="color-swatch active" data-color="#6c63ff" style="background:#6c63ff" onclick="selectColor(this,'#6c63ff')"></button>
+        <button class="color-swatch" data-color="#ff6584" style="background:#ff6584" onclick="selectColor(this,'#ff6584')"></button>
+        <button class="color-swatch" data-color="#43d9a2" style="background:#43d9a2" onclick="selectColor(this,'#43d9a2')"></button>
+        <button class="color-swatch" data-color="#ffa94d" style="background:#ffa94d" onclick="selectColor(this,'#ffa94d')"></button>
+        <button class="color-swatch" data-color="#74c0fc" style="background:#74c0fc" onclick="selectColor(this,'#74c0fc')"></button>
+        <button class="color-swatch" data-color="#f783ac" style="background:#f783ac" onclick="selectColor(this,'#f783ac')"></button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeDeckModal()">Batal</button>
+      <button class="btn-primary" onclick="saveDeck()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KARTU -->
+<div class="modal-overlay hidden" id="card-modal">
+  <div class="modal-box card">
+    <div class="modal-header"><h3 id="card-modal-title">Tambah Kartu</h3><button class="modal-close" onclick="closeCardModal()">✕</button></div>
+    <div class="form-group"><label>Pertanyaan (Front) *</label><textarea id="card-front-input" placeholder="Tulis pertanyaan…" rows="3"></textarea></div>
+    <div class="form-group"><label>Jawaban (Back) *</label><textarea id="card-back-input" placeholder="Tulis jawaban…" rows="3"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCardModal()">Batal</button>
+      <button class="btn-primary" onclick="saveCard()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="moti-popup hidden" id="moti-popup">
+  <div class="moti-emoji" id="moti-emoji">🌟</div>
+  <p id="moti-msg">Keren!</p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
